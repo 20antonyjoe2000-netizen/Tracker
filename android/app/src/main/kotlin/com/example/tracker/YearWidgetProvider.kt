@@ -42,6 +42,7 @@ class YearWidgetProvider : HomeWidgetProvider() {
             val spacingScale = widgetData.getFloat("spacing_scale", 1.0f)
             val verticalOffset = widgetData.getFloat("vertical_offset", 0.0f)
             val gridScale = widgetData.getFloat("grid_scale", 1.0f)
+            val gridColumns = widgetData.getInt("grid_columns", 12)
 
             views.setTextViewText(R.id.days_remaining, "$daysRemaining")
             views.setTextViewText(R.id.percentage, String.format("%.1f%%", percentageCompleted))
@@ -49,7 +50,7 @@ class YearWidgetProvider : HomeWidgetProvider() {
             views.setTextViewText(R.id.days_lived, "$daysLived days lived")
 
             // Generate dot grid bitmap
-            val bitmap = WallpaperHelper.generateDotGridBitmap(totalDays, currentDayOfYear, 1024, 1024, primaryColor, dotScale, spacingScale, verticalOffset, gridScale)
+            val bitmap = WallpaperHelper.generateDotGridBitmap(totalDays, currentDayOfYear, 1024, 1024, primaryColor, dotScale, spacingScale, verticalOffset, gridScale, gridColumns)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)

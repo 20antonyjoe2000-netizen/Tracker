@@ -20,6 +20,7 @@ class WallpaperUpdateWorker(context: Context, params: WorkerParameters) : Worker
         val spacingScale = prefs.getFloat("spacing_scale", 1.0f).toDouble()
         val verticalOffset = prefs.getFloat("vertical_offset", 0.0f).toDouble()
         val gridScale = prefs.getFloat("grid_scale", 1.0f).toDouble()
+        val gridColumns = prefs.getInt("grid_columns", 12)
 
         try {
             val wallpaperManager = WallpaperManager.getInstance(applicationContext)
@@ -28,7 +29,7 @@ class WallpaperUpdateWorker(context: Context, params: WorkerParameters) : Worker
             val height = displayMetrics.heightPixels
 
             val bitmap = WallpaperHelper.generateWallpaperBitmap(
-                applicationContext, width, height, colorHex, dotScale, spacingScale, verticalOffset, gridScale
+                applicationContext, width, height, colorHex, dotScale, spacingScale, verticalOffset, gridScale, gridColumns
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

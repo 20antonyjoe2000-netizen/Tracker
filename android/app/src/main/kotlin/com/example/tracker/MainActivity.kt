@@ -26,11 +26,12 @@ class MainActivity: FlutterActivity() {
                     val spacingScale = call.argument<Double>("spacing_scale") ?: 1.0
                     val verticalOffset = call.argument<Double>("vertical_offset") ?: 0.0
                     val gridScale = call.argument<Double>("grid_scale") ?: 1.0
+                    val gridColumns = call.argument<Int>("grid_columns") ?: 12
 
                     // Save settings for background worker
-                    saveWallpaperSettings(target, colorHex, dotScale, spacingScale, verticalOffset, gridScale)
+                    saveWallpaperSettings(target, colorHex, dotScale, spacingScale, verticalOffset, gridScale, gridColumns)
                     
-                    val success = setWallpaper(target, colorHex, dotScale, spacingScale, verticalOffset, gridScale)
+                    val success = setWallpaper(target, colorHex, dotScale, spacingScale, verticalOffset, gridScale, gridColumns)
                     if (success) {
                         scheduleWallpaperUpdate()
                         result.success(true)
@@ -45,7 +46,7 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    private fun saveWallpaperSettings(target: String, colorHex: String, dotScale: Double, spacingScale: Double, verticalOffset: Double, gridScale: Double) {
+    private fun saveWallpaperSettings(target: String, colorHex: String, dotScale: Double, spacingScale: Double, verticalOffset: Double, gridScale: Double, gridColumns: Int) {
         val prefs = applicationContext.getSharedPreferences("HomeWidgetPrefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
             putString("wallpaper_target", target)
@@ -54,6 +55,7 @@ class MainActivity: FlutterActivity() {
             putFloat("spacing_scale", spacingScale.toFloat())
             putFloat("vertical_offset", verticalOffset.toFloat())
             putFloat("grid_scale", gridScale.toFloat())
+            putInt("grid_columns", gridColumns)
             apply()
         }
     }
@@ -70,7 +72,7 @@ class MainActivity: FlutterActivity() {
         )
     }
 
-    private fun setWallpaper(target: String, colorHex: String, dotScale: Double, spacingScale: Double, verticalOffset: Double, gridScale: Double): Boolean {
+    private fun setWallpaper(target: String, colorHex: String, dotScale: Double, spacingScale: Double, verticalOffset: Double, gridScale: Double, gridColumns: Int): Boolean {
         return try {
             val wallpaperManager = WallpaperManager.getInstance(applicationContext)
             val displayMetrics = resources.displayMetrics
@@ -78,7 +80,7 @@ class MainActivity: FlutterActivity() {
             val height = displayMetrics.heightPixels
 
             val bitmap = WallpaperHelper.generateWallpaperBitmap(
-                applicationContext, width, height, colorHex, dotScale, spacingScale, verticalOffset, gridScale
+                applicationContext, width, height, colorHex, dotScale, spacingScale, verticalOffset, gridScale, gridColumns
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

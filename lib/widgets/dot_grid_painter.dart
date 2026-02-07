@@ -97,6 +97,7 @@ class DotGridPainter extends CustomPainter {
         oldDelegate.dotScale != dotScale ||
         oldDelegate.spacingScale != spacingScale ||
         oldDelegate.verticalOffset != verticalOffset ||
-        oldDelegate.gridScale != gridScale;
+        oldDelegate.gridScale != gridScale ||
+        oldDelegate.columns != columns;
   }
 }

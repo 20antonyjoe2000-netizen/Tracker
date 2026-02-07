@@ -18,7 +18,8 @@ object WallpaperHelper {
         dotScale: Double,
         spacingScale: Double,
         verticalOffset: Double,
-        gridScale: Double
+        gridScale: Double,
+        columns: Int
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -35,7 +36,6 @@ object WallpaperHelper {
         startOfYear.set(year, Calendar.JANUARY, 1, 0, 0, 0)
         val currentDayOfYear = ((now.timeInMillis - startOfYear.timeInMillis) / (1000 * 60 * 60 * 24)).toInt() + 1
 
-        val columns = 12
         val rows = ceil(totalDays.toDouble() / columns).toInt()
 
         val baseWidth = width.toFloat() * 0.85f * gridScale.toFloat()
@@ -138,12 +138,12 @@ object WallpaperHelper {
         dotScale: Float,
         spacingScale: Float,
         verticalOffset: Float,
-        gridScale: Float
+        gridScale: Float,
+        columns: Int
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val columns = 12
         val rows = ceil(totalDays.toDouble() / columns).toInt()
 
         val baseWidth = width.toFloat() * 0.85f * gridScale

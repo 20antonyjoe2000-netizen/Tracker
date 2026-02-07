@@ -45,6 +45,7 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
   double _spacingScale = 1.0;
   double _verticalOffset = 0.0;
   double _gridScale = 1.0;
+  int _gridColumns = 12;
 
   @override
   void initState() {
@@ -94,6 +95,7 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
       _spacingScale = prefs.getDouble('spacing_scale') ?? 1.0;
       _verticalOffset = prefs.getDouble('vertical_offset') ?? 0.0;
       _gridScale = prefs.getDouble('grid_scale') ?? 1.0;
+      _gridColumns = prefs.getInt('grid_columns') ?? 12;
     });
   }
 
@@ -104,12 +106,13 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
     if (value is String) await prefs.setString(key, value);
     if (value is bool) await prefs.setBool(key, value);
 
-    // Sync with HomeWidget
     if (key == 'primary_color') {
       final color = Color(value as int);
       await HomeWidget.saveWidgetData<String>('primary_color_hex', '#${color.toARGB32().toRadixString(16).padLeft(8, '0')}');
-    } else {
-      await HomeWidget.saveWidgetData<double>(key, value as double);
+    } else if (value is double) {
+      await HomeWidget.saveWidgetData<double>(key, value);
+    } else if (value is int) {
+      await HomeWidget.saveWidgetData<int>(key, value);
     }
     
     await HomeWidget.updateWidget(
@@ -138,6 +141,7 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
         'spacing_scale': _spacingScale,
         'vertical_offset': _verticalOffset,
         'grid_scale': _gridScale,
+        'grid_columns': _gridColumns,
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -290,6 +294,21 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
                     setState(() {});
                   },
                 ),
+                _CustomSlider(
+                  label: 'Columns',
+                  value: _gridColumns.toDouble(),
+                  min: 8,
+                  max: 20,
+                  divisions: 12,
+                  activeColor: _selectedColor,
+                  onChanged: (val) {
+                    setSheetState(() {
+                      _gridColumns = val.round();
+                      _saveSetting('grid_columns', _gridColumns);
+                    });
+                    setState(() {});
+                  },
+                ),
                 const SizedBox(height: 16),
               ],
             ),
@@ -386,7 +405,7 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
             painter: DotGridPainter(
               totalDays: totalDays,
               currentDayOfYear: currentDayOfYear,
-              columns: 12,
+              columns: _gridColumns,
               primaryColor: _selectedColor,
               dotScale: _dotScale,
               spacingScale: _spacingScale,
@@ -605,6 +624,7 @@ class _CustomSlider extends StatelessWidget {
   final double value;
   final double min;
   final double max;
+  final int? divisions;
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
@@ -613,6 +633,7 @@ class _CustomSlider extends StatelessWidget {
     required this.value,
     required this.min,
     required this.max,
+    this.divisions,
     required this.activeColor,
     required this.onChanged,
   });
@@ -642,6 +663,7 @@ class _CustomSlider extends StatelessWidget {
           value: value,
           min: min,
           max: max,
+          divisions: divisions,
           activeColor: activeColor,
           inactiveColor: const Color(0xFF333333),
           onChanged: onChanged,
