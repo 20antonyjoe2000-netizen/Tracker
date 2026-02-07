@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'utils/year_progress_utils.dart';
@@ -20,6 +21,9 @@ class YearTrackerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF000000),
+        textTheme: ThemeData.dark().textTheme.apply(
+          fontFamily: 'Inter',
+        ),
       ),
       home: const YearTrackerScreen(),
     );
@@ -183,135 +187,148 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
   void _showAppearanceOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Appearance',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+        builder: (context, setSheetState) => _GlassContainer(
+          borderRadius: 32,
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+              ),
+              SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ColorOption(
-                      color: const Color(0xFF9ED9A3),
-                      isSelected: _selectedColor.toARGB32() == 0xFF9ED9A3,
-                      onTap: () {
-                        setSheetState(() => _saveColor(const Color(0xFF9ED9A3)));
+                    const Text(
+                      'Appearance',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _ColorOption(
+                          color: const Color(0xFF9ED9A3),
+                          isSelected: _selectedColor.toARGB32() == 0xFF9ED9A3,
+                          onTap: () {
+                            setSheetState(() => _saveColor(const Color(0xFF9ED9A3)));
+                          },
+                        ),
+                        _ColorOption(
+                          color: const Color(0xFFFF5252),
+                          isSelected: _selectedColor.toARGB32() == 0xFFFF5252,
+                          onTap: () {
+                            setSheetState(() => _saveColor(const Color(0xFFFF5252)));
+                          },
+                        ),
+                        _ColorOption(
+                          color: const Color(0xFFFF9800),
+                          isSelected: _selectedColor.toARGB32() == 0xFFFF9800,
+                          onTap: () {
+                            setSheetState(() => _saveColor(const Color(0xFFFF9800)));
+                          },
+                        ),
+                        _ColorOption(
+                          color: const Color(0xFF448AFF),
+                          isSelected: _selectedColor.toARGB32() == 0xFF448AFF,
+                          onTap: () {
+                            setSheetState(() => _saveColor(const Color(0xFF448AFF)));
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    _CustomSlider(
+                      label: 'Dot Size',
+                      value: _dotScale,
+                      min: 0.2,
+                      max: 2.0,
+                      activeColor: _selectedColor,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          _dotScale = val;
+                          _saveSetting('dot_scale', val);
+                        });
+                        setState(() {});
                       },
                     ),
-                    _ColorOption(
-                      color: const Color(0xFFFF5252),
-                      isSelected: _selectedColor.toARGB32() == 0xFFFF5252,
-                      onTap: () {
-                        setSheetState(() => _saveColor(const Color(0xFFFF5252)));
+                    _CustomSlider(
+                      label: 'Spacing',
+                      value: _spacingScale,
+                      min: 0.5,
+                      max: 2.0,
+                      activeColor: _selectedColor,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          _spacingScale = val;
+                          _saveSetting('spacing_scale', val);
+                        });
+                        setState(() {});
                       },
                     ),
-                    _ColorOption(
-                      color: const Color(0xFFFF9800),
-                      isSelected: _selectedColor.toARGB32() == 0xFFFF9800,
-                      onTap: () {
-                        setSheetState(() => _saveColor(const Color(0xFFFF9800)));
+                    _CustomSlider(
+                      label: 'Zoom',
+                      value: _gridScale,
+                      min: 0.5,
+                      max: 1.5,
+                      activeColor: _selectedColor,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          _gridScale = val;
+                          _saveSetting('grid_scale', val);
+                        });
+                        setState(() {});
                       },
                     ),
-                    _ColorOption(
-                      color: const Color(0xFF448AFF),
-                      isSelected: _selectedColor.toARGB32() == 0xFF448AFF,
-                      onTap: () {
-                        setSheetState(() => _saveColor(const Color(0xFF448AFF)));
+                    _CustomSlider(
+                      label: 'Vertical Position',
+                      value: _verticalOffset,
+                      min: -0.5,
+                      max: 0.5,
+                      activeColor: _selectedColor,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          _verticalOffset = val;
+                          _saveSetting('vertical_offset', val);
+                        });
+                        setState(() {});
                       },
                     ),
+                    _CustomSlider(
+                      label: 'Columns',
+                      value: _gridColumns.toDouble(),
+                      min: 8,
+                      max: 20,
+                      divisions: 12,
+                      activeColor: _selectedColor,
+                      onChanged: (val) {
+                        setSheetState(() {
+                          _gridColumns = val.round();
+                          _saveSetting('grid_columns', _gridColumns);
+                        });
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
-                const SizedBox(height: 32),
-                _CustomSlider(
-                  label: 'Dot Size',
-                  value: _dotScale,
-                  min: 0.2,
-                  max: 2.0,
-                  activeColor: _selectedColor,
-                  onChanged: (val) {
-                    setSheetState(() {
-                      _dotScale = val;
-                      _saveSetting('dot_scale', val);
-                    });
-                    setState(() {});
-                  },
-                ),
-                _CustomSlider(
-                  label: 'Spacing',
-                  value: _spacingScale,
-                  min: 0.5,
-                  max: 2.0,
-                  activeColor: _selectedColor,
-                  onChanged: (val) {
-                    setSheetState(() {
-                      _spacingScale = val;
-                      _saveSetting('spacing_scale', val);
-                    });
-                    setState(() {});
-                  },
-                ),
-                _CustomSlider(
-                  label: 'Zoom',
-                  value: _gridScale,
-                  min: 0.5,
-                  max: 1.5,
-                  activeColor: _selectedColor,
-                  onChanged: (val) {
-                    setSheetState(() {
-                      _gridScale = val;
-                      _saveSetting('grid_scale', val);
-                    });
-                    setState(() {});
-                  },
-                ),
-                _CustomSlider(
-                  label: 'Vertical Position',
-                  value: _verticalOffset,
-                  min: -0.5,
-                  max: 0.5,
-                  activeColor: _selectedColor,
-                  onChanged: (val) {
-                    setSheetState(() {
-                      _verticalOffset = val;
-                      _saveSetting('vertical_offset', val);
-                    });
-                    setState(() {});
-                  },
-                ),
-                _CustomSlider(
-                  label: 'Columns',
-                  value: _gridColumns.toDouble(),
-                  min: 8,
-                  max: 20,
-                  divisions: 12,
-                  activeColor: _selectedColor,
-                  onChanged: (val) {
-                    setSheetState(() {
-                      _gridColumns = val.round();
-                      _saveSetting('grid_columns', _gridColumns);
-                    });
-                    setState(() {});
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -321,61 +338,79 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
   void _showWallpaperOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Set as Wallpaper',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+      backgroundColor: Colors.transparent,
+      builder: (context) => _GlassContainer(
+        borderRadius: 32,
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
               ),
-              const SizedBox(height: 20),
-              _WallpaperOption(
-                icon: Icons.home_outlined,
-                label: 'Home Screen',
-                onTap: () {
-                  Navigator.pop(context);
-                  _setWallpaper('home');
-                },
+            ),
+            SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Set as Wallpaper',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _WallpaperOption(
+                    icon: Icons.home_outlined,
+                    label: 'Home Screen',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _setWallpaper('home');
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _WallpaperOption(
+                    icon: Icons.lock_outline,
+                    label: 'Lock Screen',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _setWallpaper('lock');
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _WallpaperOption(
+                    icon: Icons.wallpaper,
+                    label: 'Both Screens',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _setWallpaper('both');
+                    },
+                    isPrimary: true,
+                    primaryColor: _selectedColor,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Note: Wallpaper uses App colors and scales.'.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.white.withValues(alpha: 0.3),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _WallpaperOption(
-                icon: Icons.lock_outline,
-                label: 'Lock Screen',
-                onTap: () {
-                  Navigator.pop(context);
-                  _setWallpaper('lock');
-                },
-              ),
-              const SizedBox(height: 12),
-                _WallpaperOption(
-                  icon: Icons.wallpaper,
-                  label: 'Both Screens',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _setWallpaper('both');
-                  },
-                  isPrimary: true,
-                  primaryColor: _selectedColor,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Note: Wallpaper uses App colors and scales.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -392,7 +427,26 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _buildBody(totalDays, currentDayOfYear, daysRemaining, daysLived, percentageCompleted),
+      body: Stack(
+        children: [
+          // Subtle background gradient for depth
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 1.5,
+                  colors: [
+                    _selectedColor.withValues(alpha: 0.05),
+                    Colors.black,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          _buildBody(totalDays, currentDayOfYear, daysRemaining, daysLived, percentageCompleted),
+        ],
+      ),
     );
   }
 
@@ -434,15 +488,19 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
                     Text(
                       '$daysRemaining',
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.12,
-                        fontWeight: FontWeight.bold,
+                        fontSize: MediaQuery.of(context).size.width * 0.14,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
+                        letterSpacing: -2,
+                        height: 1.0,
                       ),
                     ),
                     Text(
-                      'Days remaining',
+                      'Days remaining'.toUpperCase(),
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
                         color: const Color(0xFF888888),
                       ),
                     ),
@@ -455,15 +513,19 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
                     Text(
                       '${percentageCompleted.toStringAsFixed(1)}%',
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.08,
-                        fontWeight: FontWeight.bold,
+                        fontSize: MediaQuery.of(context).size.width * 0.09,
+                        fontWeight: FontWeight.w900,
                         color: _selectedColor,
+                        letterSpacing: -1,
+                        height: 1.0,
                       ),
                     ),
                     Text(
-                      '$daysLived days lived',
+                      '$daysLived days lived'.toUpperCase(),
                       style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
                         color: const Color(0xFF888888),
                       ),
                     ),
@@ -479,33 +541,33 @@ class _YearTrackerScreenState extends State<YearTrackerScreen> with WidgetsBindi
           // Top Left: Appearance & Preview
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
+            left: 20,
+            right: 20,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  onPressed: _showAppearanceOptions,
-                  icon: Icon(Icons.palette_outlined, color: _selectedColor, size: 28),
-                  tooltip: 'Appearance',
+                Row(
+                  children: [
+                    _GlassIconButton(
+                      icon: Icons.palette_outlined,
+                      color: _selectedColor,
+                      onPressed: _showAppearanceOptions,
+                    ),
+                    const SizedBox(width: 12),
+                    _GlassIconButton(
+                      icon: Icons.visibility_outlined,
+                      color: _selectedColor,
+                      onPressed: () => setState(() => _isPreviewMode = true),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: () => setState(() => _isPreviewMode = true),
-                  icon: Icon(Icons.visibility_outlined, color: _selectedColor, size: 28),
-                  tooltip: 'Preview',
+                _GlassIconButton(
+                  icon: _isSettingWallpaper ? null : Icons.wallpaper,
+                  color: _selectedColor,
+                  isLoading: _isSettingWallpaper,
+                  onPressed: _isSettingWallpaper ? null : _showWallpaperOptions,
                 ),
               ],
-            ),
-          ),
-          // Top Right: Wallpaper
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            right: 16,
-            child: IconButton(
-              onPressed: _isSettingWallpaper ? null : _showWallpaperOptions,
-              icon: _isSettingWallpaper
-                  ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: _selectedColor))
-                  : Icon(Icons.wallpaper, color: _selectedColor, size: 28),
-              tooltip: 'Set Wallpaper',
             ),
           ),
         ],
@@ -548,31 +610,39 @@ class _WallpaperOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: isPrimary ? primaryColor : const Color(0xFF2A2A2A),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: isPrimary ? Colors.black : Colors.white,
-                size: 24,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: isPrimary ? primaryColor : Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
                   color: isPrimary ? Colors.black : Colors.white,
+                  size: 22,
                 ),
-              ),
-            ],
+                const SizedBox(width: 16),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isPrimary ? Colors.black : Colors.white,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                if (isPrimary) ...[
+                  const Spacer(),
+                  const Icon(Icons.check_circle, color: Colors.black, size: 20),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -596,19 +666,19 @@ class _ColorOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 32,
-        height: 32,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
           border: isSelected
               ? Border.all(color: Colors.white, width: 3)
-              : null,
+              : Border.all(color: Colors.white12, width: 1),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.4),
-                    blurRadius: 8,
+                    color: color.withValues(alpha: 0.5),
+                    blurRadius: 12,
                     spreadRadius: 2,
                   )
                 ]
@@ -669,6 +739,75 @@ class _CustomSlider extends StatelessWidget {
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _GlassIconButton extends StatelessWidget {
+  final IconData? icon;
+  final Color color;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const _GlassIconButton({
+    this.icon,
+    required this.color,
+    this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _GlassContainer(
+      borderRadius: 16,
+      padding: EdgeInsets.zero,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: color),
+              )
+            : Icon(icon, color: color, size: 22),
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      ),
+    );
+  }
+}
+
+class _GlassContainer extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final EdgeInsetsGeometry padding;
+  final Color? color;
+
+  const _GlassContainer({
+    required this.child,
+    this.borderRadius = 24,
+    this.padding = const EdgeInsets.all(16),
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: (color ?? Colors.white).withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 }
